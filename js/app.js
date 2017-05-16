@@ -1,15 +1,13 @@
 //there needs to be a user interface module as well as a data module
 //also there needs to be a controller module to control the app
-
-var budgetController = (function() {//this makes it impossible to access anything in this function from the outside
-
+var budgetController = (function() {
+//this makes it impossible to access anything in this function from the outside
 	var Expense = function(id, description, value) {
 		this.id = id;
 		this.description = description;
 		this.value = value;
 		this.percentage = -1;
 	};
-
 	Expense.prototype.calcPercentage = function(totalIncome) {
 		if(totalIncome > 0) {
 		this.percentage = Math.round((this.value / totalIncome) * 100);
@@ -20,13 +18,11 @@ var budgetController = (function() {//this makes it impossible to access anythin
 	Expense.prototype.getPercentage = function() {
 		return this.percentage;
 	};
-
 	var Income = function(id, description, value) {
 		this.id = id;
 		this.description = description;
 		this.value = value;
 	};
-
 	var calculateTotal = function(type) {
 		var sum = 0;
 		data.allItems[type].forEach(function(cur) {
@@ -34,7 +30,6 @@ var budgetController = (function() {//this makes it impossible to access anythin
 		});
 		data.totals[type] = sum;
 	};
-
 	var data = {
 		allItems: {
 			exp: [],
@@ -47,12 +42,10 @@ var budgetController = (function() {//this makes it impossible to access anythin
 		budget: 0,
 		percentage: -1
 	};
-
 	return {
 		addItem: function(type, des, val) {
 			var newItem, ID;
 			//creates a new id
-
 			if(data.allItems[type].length > 0) {
 			ID = data.allItems[type][data.allItems[type].length - 1].id + 1;//selects the last element
 			} else {
@@ -69,7 +62,6 @@ var budgetController = (function() {//this makes it impossible to access anythin
 			//returns the new item
 			return newItem;
 		},
-
 		deleteItem: function(type, id) {
 			var ids, index;
 			ids = data.allItems[type].map(function(current) {
@@ -80,7 +72,6 @@ var budgetController = (function() {//this makes it impossible to access anythin
 				data.allItems[type].splice(index, 1);
 			}
 		},
-
 		calculateBudget: function() {
 			calculateTotal('exp');
 			calculateTotal('inc');
@@ -92,21 +83,17 @@ var budgetController = (function() {//this makes it impossible to access anythin
 			data.percentage = -1;
 		}
 		},
-
 		calculatePercentages: function() {
 			data.allItems.exp.forEach(function(cur) {
 				cur.calcPercentage(data.totals.inc);
 			});
 		},
-
 		getPercentages: function() {
 			var allPerc = data.allItems.exp.map(function(cur) {
 				return cur.getPercentage();
 			});
-
 			return allPerc;
 		},
-
 		getBudget: function() {
 			return {
 				budget: data.budget,
@@ -115,14 +102,11 @@ var budgetController = (function() {//this makes it impossible to access anythin
 				percentage: data.percentage 
 			};
 		},
-
 		testing: function() {
 			console.log(data);
 		}
 	};
-
 })();
-
 var UIController = (function() {
 	//THESE ARE THE CLASS NAMES WITHIN THE HTML
 	var DOMstrings = {
@@ -139,9 +123,7 @@ var UIController = (function() {
 		container: '.container',
 		expensesPercLabel: '.item__percentage',
 		dateLabel: '.budget__title--month'
-
 	};
-
 			var formatNumber = function(num, type) {
 			var numSplit, int, dec;
 			num = Math.abs(num);
@@ -151,28 +133,19 @@ var UIController = (function() {
 			if(int.length > 3) {
 				int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3);
 			}
-			dec = numSplit[1];
-
-			
+			dec = numSplit[1];		
 			return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
 		};
-
-
 	return {
 		getInput: function() {
 			return {
 			type: document.querySelector(DOMstrings.inputType).value,
 		    description: document.querySelector(DOMstrings.inputDescription).value,
 			value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
-			};
-
-			
+			};	
 		},
-
 		addListItem: function(obj, type) {
-
 			var html, newHtml, element;
-
 			if(type === 'inc') {
 			element = DOMstrings.incomeContainer;
 			html = '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
@@ -183,24 +156,19 @@ var UIController = (function() {
 			newHtml = html.replace('%id%', obj.id);
 			newHtml = newHtml.replace('%description%', obj.description);
 			newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
-
 			document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
 		},
-
 		deleteListItem: function(selectorId) {
 			var el = document.getElementById(selectorId);
 			el.parentNode.removeChild(el)
 		},
-
 		clearFields: function() {
 			var fields, fieldsArray;
-
 			 	fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
 				fieldsArray = Array.prototype.slice.call(fields);
 				fieldsArray.forEach(function(current, index, array) {
 					current.value = "";
 				});
-
 				fieldsArray[0].focus();
 		},
 		displayBudget: function(obj) {
@@ -209,17 +177,14 @@ var UIController = (function() {
 			document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
 			document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
 			document.querySelector(DOMstrings.expenseLabel).textContent = formatNumber(obj.totalExp, 'exp');
-			
 			if(obj.percentage > 0)	{
 				document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage + '%';
 			} else {
 				document.querySelector(DOMstrings.percentageLabel).textContent = '---';
 			}
 		},
-
 		displayPercentages: function(percentages) {
 			var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
-
 			var nodeListForEach = function(list, callback) {
 				for(var i = 0; i < list.length; i++) {
 					callback(list[i], i);
@@ -233,7 +198,6 @@ var UIController = (function() {
 			}
 			});
 		},
-
 		displayMonth: function() {
 			var now, year, month, months;
 				now = new Date();
@@ -241,18 +205,14 @@ var UIController = (function() {
 				month = now.getMonth();
 				year = now.getFullYear();
 				document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
-
 		},
-
 		getDOMstrings: function() {
 			return DOMstrings;
 		}
 	};
-
 })();
 
 var controller = (function(budgetCtrl, UICtrl) {
-
 	var setupEventListeners = function() {
 		var DOM = UICtrl.getDOMstrings();
 		document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
@@ -261,30 +221,21 @@ var controller = (function(budgetCtrl, UICtrl) {
 				ctrlAddItem();
 			}
 	});
-
 		document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
-
 	};
-
-
-
 	var updateBudget = function() {
 		budgetCtrl.calculateBudget();
 		var budget = budgetCtrl.getBudget();
 		UICtrl.displayBudget(budget);
 	};
-
 	var updatePercentages = function() {
 		budgetCtrl.calculatePercentages();
 		var percentages = budgetCtrl.getPercentages();
 		UICtrl.displayPercentages(percentages);
 	}
-
 	var ctrlAddItem = function() {
 		var input, newItem;
-
 		 input = UICtrl.getInput();
-
 		 if(input.description !== "" && !isNaN(input.value) && input.value > 0) {
 		 	newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 		 	UICtrl.addListItem(newItem, input.type);
@@ -292,13 +243,10 @@ var controller = (function(budgetCtrl, UICtrl) {
 		 	updateBudget();
 		 	updatePercentages();
 		}
-
 	};
-
 	var ctrlDeleteItem = function(e) {
 		var itemId, splitId, type, ID;
 		itemId = e.target.parentNode.parentNode.parentNode.parentNode.id;
-
 		if(itemId) {
 			splitId = itemId.split('-');
 			type = splitId[0];
@@ -307,10 +255,8 @@ var controller = (function(budgetCtrl, UICtrl) {
 			UICtrl.deleteListItem(itemId);
 			updateBudget();
 			updatePercentages();
-			
 		}
 	};
-
 	return {
 		init: function() {
 			console.log("Application has started");
@@ -324,7 +270,6 @@ var controller = (function(budgetCtrl, UICtrl) {
 			setupEventListeners();
 		}
 	};
-
 })(budgetController, UIController);
 
 controller.init();
